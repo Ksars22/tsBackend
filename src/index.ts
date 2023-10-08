@@ -2,6 +2,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import { UserModel } from './model';
+import cors from 'cors'
 
 dotenv.config();
 const app = express();
@@ -13,6 +14,7 @@ mongoose.connect(uri)
     .catch(error => console.error(error));
 
 app.use(express.json());
+app.use(cors());
 
 app.post('/add-user', (req, res) => {
     const data = new UserModel({
