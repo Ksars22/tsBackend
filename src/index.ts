@@ -15,6 +15,7 @@ mongoose.connect(uri)
 
 app.use(express.json());
 app.use(cors());
+app.use(cors());
 
 app.post('/add-user', (req, res) => {
     const data = new UserModel({
