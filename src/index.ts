@@ -1,13 +1,38 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-import { UserModel } from './model';
 import cors from 'cors';
+import { UserModel } from './model';
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
 
 dotenv.config();
 const app = express();
+const sKey: string = process.env.SECRET_KEY || '';
 
-const uri: string = process.env.DATABASE_URL || '';
+function verifyToken(req: any, res: any, next: any) {
+    const bearerHeader = req.headers['authorization'];
+
+    if (typeof bearerHeader !== 'undefined') {
+        const bearerToken = bearerHeader.split(" ")[1];
+        req.token = bearerToken;
+        next();
+    } else {
+        res.status(403);
+    }
+}
+
+const dev: string = process.env.DEV_USER || '';
+var uri: string = '';
+
+switch (dev) {
+    case 'matt':
+        uri = process.env.DATABASE_URL || '';
+        break;
+    case 'kyle':
+        uri = process.env.TEST_DATABASE_URL || '';
+        break;
+}
 
 mongoose.connect(uri)
     .then(() => console.log('Connected to db'))
@@ -18,7 +43,6 @@ app.use(cors());
 
 app.post('/add-user', (req, res) => {
     const data = new UserModel({
-        uid: req.body.uid,
         username: req.body.username,
         password: req.body.password,
         email: req.body.email,
@@ -39,4 +63,61 @@ app.get('/get-user', async (req, res) => {
     }
 });
 
-app.listen(1313, () => console.log('Server started'));
+app.post('/login', async (req, res) => {
+
+    const username = req.body.username;
+    const password = req.body.password;
+
+    const user = await UserModel.findOne({ "username": username });
+    if (user)
+        bcrypt.compare(password, user.password, (error, result) => {
+            if (error) {
+                console.error('Error comparing passwords', error);
+            }
+            else if (result) {
+                console.log('Password Matched');
+                jwt.sign({ id: user._id }, sKey, (error: any, token: any) => {
+                    if (error) {
+                        console.error("error jwt");
+                    }
+                    else {
+
+                        res.status(200).json({ token });
+                    }
+                })
+            }
+            else {
+                res.status(403).send({ "message": "Error Username or Password is Incorrect" });
+            }
+        });
+});
+
+app.post('/signup', async (req, res) => {
+
+    const user = await UserModel.findOne({ username: req.body.username });
+    if (user != null) {
+        res.status(400).json({ message: "Error username already exists" });
+    }
+    else {
+        const saltrounds = 10;
+
+        var password = req.body.password;
+        bcrypt.hash(password, saltrounds, (error, hash) => {
+            if (error) {
+                console.error('Error hashing password:', error);
+            }
+            else {
+                const data = new UserModel({
+                    username: req.body.username,
+                    password: hash,
+                    email: req.body.email,
+                    phone: req.body.phone
+                });
+                const dataToSave = data.save();
+                res.status(200).json(dataToSave);
+            }
+        });
+    }
+});
+
+app.listen(process.env.PORT, () => console.log('Server started'));
