@@ -107,8 +107,6 @@ app.post('/signup', async (req, res) => {
                 console.error('Error hashing password:', error);
             }
             else {
-                console.log(hash);
-
                 const data = new UserModel({
                     username: req.body.username,
                     password: hash,
