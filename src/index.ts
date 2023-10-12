@@ -8,6 +8,7 @@ import bcrypt from 'bcrypt';
 
 dotenv.config();
 const app = express();
+const sKey: string = process.env.SECRET_KEY || '';
 
 function verifyToken(req, res, next) {
     const bearerHeader = req.headers['authorization'];
@@ -80,7 +81,7 @@ app.post('/login', async (req, res) => {
             }
             else if (result) {
                 console.log('Password Matched');
-                jwt.sign({ user: user }, "secretkey", (error: any, token: any) => {
+                jwt.sign({ user: user }, sKey, (error: any, token: any) => {
                     if (error) {
                         console.error("error jwt");
                     }
