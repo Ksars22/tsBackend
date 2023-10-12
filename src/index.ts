@@ -10,7 +10,7 @@ dotenv.config();
 const app = express();
 const sKey: string = process.env.SECRET_KEY || '';
 
-function verifyToken(req, res, next) {
+function verifyToken(req: any, res: any, next: any) {
     const bearerHeader = req.headers['authorization'];
 
     if (typeof bearerHeader !== 'undefined') {
@@ -63,11 +63,6 @@ app.get('/get-user', async (req, res) => {
     }
 });
 
-app.get('/test', (req, res) => {
-
-    res.redirect(200, 'https://macrosolver.com/login');
-});
-
 app.post('/login', async (req, res) => {
 
     const username = req.body.username;
@@ -81,7 +76,7 @@ app.post('/login', async (req, res) => {
             }
             else if (result) {
                 console.log('Password Matched');
-                jwt.sign({ user: user }, sKey, (error: any, token: any) => {
+                jwt.sign({ id: user._id }, sKey, (error: any, token: any) => {
                     if (error) {
                         console.error("error jwt");
                     }
@@ -97,29 +92,34 @@ app.post('/login', async (req, res) => {
         });
 });
 
-app.post('/signup', (req, res) => {
+app.post('/signup', async (req, res) => {
 
-    const saltrounds = 10;
+    const user = await UserModel.findOne({ username: req.body.username });
+    if (user != null) {
+        res.status(400).json({ message: "Error username already exists" });
+    }
+    else {
+        const saltrounds = 10;
 
-    var password = req.body.password;
-    bcrypt.hash(password, saltrounds, (error, hash) => {
-        if (error) {
-            console.error('Error hashing password:', error);
-        }
-        else {
-            console.log(hash);
+        var password = req.body.password;
+        bcrypt.hash(password, saltrounds, (error, hash) => {
+            if (error) {
+                console.error('Error hashing password:', error);
+            }
+            else {
+                console.log(hash);
 
-            const data = new UserModel({
-                username: req.body.username,
-                password: hash,
-                email: req.body.email,
-                phone: req.body.phone
-            });
-            const dataToSave = data.save();
-            res.status(200).json(dataToSave);
-        }
-    });
-
+                const data = new UserModel({
+                    username: req.body.username,
+                    password: hash,
+                    email: req.body.email,
+                    phone: req.body.phone
+                });
+                const dataToSave = data.save();
+                res.status(200).json(dataToSave);
+            }
+        });
+    }
 });
 
 app.listen(process.env.PORT, () => console.log('Server started'));
