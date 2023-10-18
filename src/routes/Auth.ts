@@ -32,13 +32,11 @@ AuthRouter.post('/login', async (req, res) => {
 
         bcrypt.compare(password, user.password, (error, result) => {
             if (error) {
-                res.status(404).send({ "error": "Login Error" });
+                res.status(403).send({ message: "Login Error" });
                 console.error('Error comparing passwords', error);
             } else if (result) {
-                console.log('Password Matched');
                 jwt.sign({ id: user._id }, env.secret_key, (error: any, token: any) => {
                     if (error) {
-                        console.error("error jwt");
                         res.status(500).send({ "error": "JWT Error" });
                     } else {
                         res.status(200).json({ token });
@@ -49,7 +47,6 @@ AuthRouter.post('/login', async (req, res) => {
             }
         });
     } catch (err) {
-        console.error('Error in login:', err);
         res.status(500).send({ "error": "Internal Server Error" });
     }
 });
@@ -58,7 +55,7 @@ AuthRouter.post('/signup', async (req, res) => {
 
     const user = await UserModel.findOne({ username: req.body.username });
     if (user != null) {
-        res.status(400).json({ message: "Error username already exists" });
+        res.status(403).json({ message: "Error username already exists" });
     }
     else {
         const saltrounds = 10;
@@ -76,7 +73,7 @@ AuthRouter.post('/signup', async (req, res) => {
                     phone: req.body.phone
                 });
                 data.save();
-                res.status(200).json({ message: "Login Success" });
+                res.status(200).json({ message: "Signup Success" });
             }
         });
     }
