@@ -11,4 +11,4 @@ const mealPlanSchema = new mongoose.Schema({
     }
 })
 
-export const UserModel = mongoose.model('MealPlan', mealPlanSchema)
+export const MealPlanModel = mongoose.model('MealPlan', mealPlanSchema)
