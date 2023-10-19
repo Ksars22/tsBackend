@@ -76,7 +76,7 @@ AuthRouter.post('/signup', async (req, res) => {
                     phone: req.body.phone
                 });
                 data.save();
-                res.status(200).json({ message: "Login Success" });
+                res.status(200).json({ message: "Signup Success" });
             }
         });
     }

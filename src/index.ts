@@ -1,7 +1,8 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
-import AuthRouter from './routes/Auth'
+import AuthRouter from './routes/Auth';
+import MealRouter from './routes/Meal';
 import vEnviroment from './enviroment';
 
 export const env = new vEnviroment();
@@ -14,5 +15,7 @@ mongoose.connect(env.db_uri)
 app.use(express.json());
 app.use(cors());
 app.use('/auth', AuthRouter);
+app.use('/meal', MealRouter);
+
 
 app.listen(env.port, () => console.log('Server started'));
