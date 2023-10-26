@@ -79,4 +79,32 @@ AuthRouter.post('/signup', async (req, res) => {
     }
 });
 
+AuthRouter.get('/userID', async (req, res) => {
+
+    const user = await UserModel.findOne({ username: req.body.username });
+    if (user != null) {
+        res.status(403).json({ message: "Error username already exists" });
+    }
+    else {
+        const saltrounds = 10;
+
+        var password = req.body.password;
+        bcrypt.hash(password, saltrounds, (error, hash) => {
+            if (error) {
+                console.error('Error hashing password:', error);
+            }
+            else {
+                const data = new UserModel({
+                    username: req.body.username,
+                    password: hash,
+                    email: req.body.email,
+                    phone: req.body.phone
+                });
+                data.save();
+                res.status(200).json({ message: "Signup Success" });
+            }
+        });
+    }
+});
+
 export default AuthRouter;

@@ -5,7 +5,7 @@ const mealPlanSchema = new mongoose.Schema({
         required: true,
         type: String
     },
-    mealJson: {
+    mealPlanForm: {
         required: true,
         type: String
     }

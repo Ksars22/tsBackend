@@ -17,5 +17,4 @@ app.use(cors());
 app.use('/auth', AuthRouter);
 app.use('/meal', MealRouter);
 
-
 app.listen(env.port, () => console.log('Server started'));
