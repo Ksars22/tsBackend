@@ -1,22 +1,44 @@
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { UserModel } from '../models/userModel';
 import { env } from '../index'
+import { AnyError } from 'mongodb';
 
-export function verifyToken(req: any, res: any, next: any) {
-    const bearerHeader = req.headers['authorization'];
-
-    if (typeof bearerHeader !== 'undefined') {
-        const bearerToken = bearerHeader.split(" ")[1];
-        req.token = bearerToken;
-        next();
-    } else {
-        res.status(403);
-    }
+export interface CustomRequest extends Request {
+    token?: string;
 }
 
+// export function verifyToken(req: any, res: any, next: any) {
+//     const bearerHeader = req.headers['authorization'];
+
+//     if (typeof bearerHeader !== 'undefined') {
+//         const bearerToken = bearerHeader;
+
+//         req.cookie('token', bearerToken, { httpOnly: true }); // Setting a cookie named 'token'.
+//         console.log("YOUR MOM" + bearerToken)
+//         next();
+//     } else {
+//         res.status(403);
+//     }
+// }
+
 const AuthRouter = express.Router();
+
+AuthRouter.post('/test', async (req, res) => {
+    let cookie: string = req.headers['authorization'] || ''
+    jwt.verify(cookie, env.secret_key, (err: any, authData: any) => {
+        if(err) {
+            console.log(err)
+            res.sendStatus(403);
+        } else {
+            res.json({
+                message: "POST created...",
+                authData
+            })
+        }
+    })
+})
 
 AuthRouter.post('/login', async (req, res) => {
     const username = req.body.username;
