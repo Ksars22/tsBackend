@@ -2,7 +2,7 @@ import express, { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { UserModel } from '../models/userModel';
-import { env } from '../index'
+import { env } from '../index';
 import { AnyError } from 'mongodb';
 
 export interface CustomRequest extends Request {

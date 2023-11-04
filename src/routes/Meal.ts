@@ -1,9 +1,21 @@
 import express from 'express';
 import { MealPlanModel } from '../models/mealPlanModel';
+import jwt from 'jsonwebtoken';
+import { env } from '../index';
 
 const MealRouter = express.Router();
 
 MealRouter.post('/create-meal-plan', async (req, res) => {
+  console.log(req)
+  let token: string = req.headers['authorization'] || ''
+  jwt.verify(token, env.secret_key, (err: any, authData: any) => {
+    if(err) {
+        console.log(err)
+        res.sendStatus(403);
+    }
+  })
+  console.log(token)
+
   try {
     const uid = req.body.uid;
     const mealPlanForm = req.body.mealPlanForm;
