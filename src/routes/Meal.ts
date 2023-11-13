@@ -1,39 +1,38 @@
-import express from 'express';
-import { MealPlanModel } from '../models/mealPlanModel';
-import jwt from 'jsonwebtoken';
-import { env } from '../index';
+import express from "express";
+import { MealPlanModel } from "../models/mealPlanModel";
+import jwt from "jsonwebtoken";
+import { env } from "../index";
+
+export interface CustomRequest extends Request {
+    token?: string;
+}
 
 const MealRouter = express.Router();
 
-MealRouter.post('/create-meal-plan', async (req, res) => {
-  console.log(req)
-  let token: string = req.headers['authorization'] || ''
-  jwt.verify(token, env.secret_key, (err: any, authData: any) => {
-    if(err) {
-        console.log(err)
-        res.sendStatus(403);
-    }
-  })
-  console.log(token)
-
-  try {
-    const uid = req.body.uid;
-    const mealPlanForm = req.body.mealPlanForm;
-
-    console.log(req.body);
-
-    const mealPlanData = new MealPlanModel({
-      uid: uid,
-      mealPlanForm: mealPlanForm
+MealRouter.post("/create-meal-plan", async (req, res) => {
+    let cookie: string = req.headers["authorization"] || "";
+    console.log(cookie);
+    jwt.verify(cookie, env.secret_key, (err: any, authData: any) => {
+        if (err) {
+            console.log(err);
+            res.sendStatus(403);
+        } else {
+            console.log(req.body.mealPlanForm);
+            const mealPlanModel = new MealPlanModel({
+                uid: cookie,
+                targetCost: req.body.mealPlanForm.targetCost,
+                calorieGoal: req.body.mealPlanForm.calorieGoal,
+                organic: req.body.mealPlanForm.organic,
+                dietType: req.body.mealPlanForm.dietType,
+            });
+            mealPlanModel.save();
+            console.log("SUCCESSSSSSSS");
+            res.json({
+                message: "POST created...",
+                authData,
+            });
+        }
     });
-
-    await mealPlanData.save(); // Use await to handle the asynchronous operation
-
-    res.sendStatus(200); // Send a 200 OK response to the client
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
 });
 
 export default MealRouter;
