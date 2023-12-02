@@ -19,6 +19,8 @@ class vEnviroment {
             case 'kyle':
                 this.db_uri = process.env.TEST_DATABASE_URL || '';
                 break;
+            case 'josh':
+                this.db_uri = process.env.TEST_DATABASE_URL || '';
         }
     }
 }

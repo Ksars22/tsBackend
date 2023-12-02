@@ -2,25 +2,28 @@ import express from 'express';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { UserModel } from '../models/userModel';
-import { env } from '../index'
-
-export function verifyToken(req: any, res: any, next: any) {
-    const bearerHeader = req.headers['authorization'];
-
-    if (typeof bearerHeader !== 'undefined') {
-        const bearerToken = bearerHeader.split(" ")[1];
-        req.token = bearerToken;
-        next();
-    } else {
-        res.status(403);
-    }
-}
+import { env } from '../index';
 
 const AuthRouter = express.Router();
+
+AuthRouter.post('/checkLogin', (req, res) => {
+    const token = req.cookies.token;
+
+    if (token) {
+        jwt.verify(token, env.secret_key, (error: any, decoded: any) => {
+            if (error) {
+                res.status(403).json({ message: 'Unauthorized' });
+            } else {
+                res.status(200).json({ token: token });
+            }
+        })
+    }
+})
 
 AuthRouter.post('/login', async (req, res) => {
     const username = req.body.username;
     const password = req.body.password;
+    const rememberMe = req.body.rememberMe;
 
     try {
         const user = await UserModel.findOne({ "username": username });
@@ -39,7 +42,16 @@ AuthRouter.post('/login', async (req, res) => {
                     if (error) {
                         res.status(500).send({ "error": "JWT Error" });
                     } else {
-                        res.status(200).json({ token });
+                        let expirationTime;
+                        if (rememberMe) {
+                            expirationTime = 30 * 24 * 60 * 60 * 1000;
+                        }
+                        else { 
+                            expirationTime = 60 * 60 * 1000;
+                        }
+                        const expirationDate = new Date(Date.now() + expirationTime);
+                        res.cookie('token', token, { httpOnly: true, expires: expirationDate });
+                        res.status(200).json({ "login": "success"  });
                     }
                 });
             } else {
