@@ -23,6 +23,7 @@ AuthRouter.post('/checkLogin', (req, res) => {
 AuthRouter.post('/login', async (req, res) => {
     const username = req.body.username;
     const password = req.body.password;
+    const rememberMe = req.body.rememberMe;
 
     try {
         const user = await UserModel.findOne({ "username": username });
@@ -41,7 +42,13 @@ AuthRouter.post('/login', async (req, res) => {
                     if (error) {
                         res.status(500).send({ "error": "JWT Error" });
                     } else {
-                        const expirationTime = 60 * 60 * 1000;
+                        let expirationTime;
+                        if (rememberMe) {
+                            expirationTime = 30 * 24 * 60 * 60 * 1000;
+                        }
+                        else { 
+                            expirationTime = 60 * 60 * 1000;
+                        }
                         const expirationDate = new Date(Date.now() + expirationTime);
                         res.cookie('token', token, { httpOnly: true, expires: expirationDate });
                         res.status(200).json({ "login": "success"  });
