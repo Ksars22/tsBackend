@@ -11,8 +11,6 @@ Welcome this is the backend for https://bitbucket.org/macroappdev/macroapprepo/s
 -   [Usage](#usage)
     -   [Authentication](#authentication)
     -   [Endpoints](#endpoints)
--   [Examples](#examples)
--   [Contributing](#contributing)
 -   [License](#license)
 
 ## Getting Started
@@ -27,7 +25,7 @@ Before you begin, make sure you have the following installed:
 
 1. Clone this repository and install dependencies:
 
-    ```bash
+    ```powershell
     git clone https://github.com/Ksars22/tsBackend.git
     cd tsBackend
     npm install
@@ -37,7 +35,7 @@ Before you begin, make sure you have the following installed:
 
 1. Create .env file and configure enviromental variables:
 
-    ```bash
+    ```powershell
     cp example-env .env
     ```
 
