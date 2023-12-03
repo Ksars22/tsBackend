@@ -63,7 +63,6 @@ Before you begin, make sure you have the following installed:
 
 ##### 1. POST /login
 
-    **
     Content-Type: application/json
 
     {
@@ -71,11 +70,9 @@ Before you begin, make sure you have the following installed:
         "password": "...",
         "rememerMe": true/false
     }
-    **
 
 ##### 2. POST /signup
 
-    **
     Content-Type: application/json
 
     {
@@ -84,13 +81,10 @@ Before you begin, make sure you have the following installed:
         "email": "...",
         "phone": "..."
     }
-    **
 
 ##### 3. GET /checkLogin
 
-    **
     Content-Type: application/json
     Cookie: token=...
-    **
 
 ### License
