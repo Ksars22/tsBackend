@@ -43,6 +43,12 @@ Before you begin, make sure you have the following installed:
 
 2. Generate a secure value for the secret key.
 
+    **you can use this powershell command to generate a random key**
+
+    ```powershell
+    -join (Get-Random -Count 32 -InputObject 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'.ToCharArray())
+    ```
+
 3. Connect MongoDB URI.
 
 4. Assign a Dev User.
