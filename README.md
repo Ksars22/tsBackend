@@ -71,6 +71,10 @@ Before you begin, make sure you have the following installed:
         "password": "...",
         "rememerMe": true/false
     }
+
+    Desired response:
+
+    *200* { "login": "success" }
     
 ##### 2. POST /signup
 
@@ -83,7 +87,17 @@ Before you begin, make sure you have the following installed:
         "phone": "..."
     }
 
+    Desired response:
+
+    *200* { "message": "Signup Success" }
+
 ##### 3. POST /checkLogin
+
+    *No body needed*
+
+    Desired response:
+
+    *200* { "token": token } *this code needs changed* should return something like { "message": "user is already logged in" }*
 
 ##### 4. POST /forgot-password
 
@@ -93,12 +107,20 @@ Before you begin, make sure you have the following installed:
         "email": "..."
     }
 
+    Desired response:
+
+    *200* { "message": "Password reset email sent" }
+
 ##### 5. POST /reset-password/:token
 
     Content-Type: application/json
 
     {
         "password": "..."
-    } 
+    }
+
+    Desired response:
+
+    *200* { "message": "Password reset successfully" }
 
 ### License
