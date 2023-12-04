@@ -9,7 +9,6 @@ Welcome this is the backend for https://bitbucket.org/macroappdev/macroapprepo/s
     -   [Installation](#installation)
     -   [Configuration](#configuration)
 -   [Usage](#usage)
-    -   [Authentication](#authentication)
     -   [Endpoints](#endpoints)
 -   [License](#license)
 
@@ -49,7 +48,11 @@ Before you begin, make sure you have the following installed:
 
 3. Connect MongoDB URI.
 
-4. Assign a Dev User.
+4. Setup SMTP with https://mailtrap.io/ or the vendor of you choosing.
+
+    **currently using the testing enviroment but will chang when switched to production**
+
+6. Assign a Dev User.
 
     **Depending on the configuration this will choose which database to connect to based on the dev user**
 
@@ -68,7 +71,7 @@ Before you begin, make sure you have the following installed:
         "password": "...",
         "rememerMe": true/false
     }
-
+    
 ##### 2. POST /signup
 
     Content-Type: application/json
@@ -80,9 +83,22 @@ Before you begin, make sure you have the following installed:
         "phone": "..."
     }
 
-##### 3. GET /checkLogin
+##### 3. POST /checkLogin
+
+##### 4. POST /forgot-password
 
     Content-Type: application/json
-    Cookie: token=...
+
+    {
+        "email": "..."
+    }
+
+##### 5. POST /reset-password/:token
+
+    Content-Type: application/json
+
+    {
+        "password": "..."
+    } 
 
 ### License
