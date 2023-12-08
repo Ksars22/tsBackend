@@ -134,7 +134,6 @@ AuthRouter.post("/login", async (req, res) => {
                             );
                             console.log(token);
                             res.cookie("token", token, {
-                                httpOnly: true,
                                 expires: expirationDate,
                             });
                             res.status(200).json({ login: "success" });
@@ -174,6 +173,24 @@ AuthRouter.post("/signup", async (req, res) => {
                 res.status(200).json({ message: "Signup Success" });
             }
         });
+    }
+});
+
+AuthRouter.get("/logout", (req, res) => {
+    try {
+        console.log("Logging out user...");
+
+        // Log the current cookie values for troubleshooting
+        console.log("Current cookies:", req.cookies);
+
+        res.clearCookie("token");
+
+        console.log("Token cookie cleared successfully");
+
+        res.status(200).json({ message: "logout successful" });
+    } catch (error) {
+        console.error("Error during logout:", error);
+        res.status(500).json({ message: "Internal Server Error" });
     }
 });
 
