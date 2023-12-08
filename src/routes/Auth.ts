@@ -90,6 +90,8 @@ AuthRouter.post("/checkLogin", (req, res) => {
                 res.status(200).json({ token: token });
             }
         });
+    } else {
+        res.status(403).json({ message: "Unauthorized" });
     }
 });
 
@@ -130,7 +132,6 @@ AuthRouter.post("/login", async (req, res) => {
                                 Date.now() + expirationTime
                             );
                             res.cookie("token", token, {
-                                httpOnly: true,
                                 expires: expirationDate,
                             });
                             res.status(200).json({ login: "success" });
@@ -170,6 +171,16 @@ AuthRouter.post("/signup", async (req, res) => {
                 res.status(200).json({ message: "Signup Success" });
             }
         });
+    }
+});
+
+AuthRouter.get("/logout", (req, res) => {
+    try {
+        res.clearCookie("token");
+        res.status(200).json({ message: "logout successful" });
+    } catch (error) {
+        console.error("Error during logout:", error);
+        res.status(500).json({ message: "Internal Server Error" });
     }
 });
 

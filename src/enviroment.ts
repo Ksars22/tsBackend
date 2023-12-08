@@ -16,8 +16,8 @@ class vEnviroment {
         this.current_dev = process.env.DEV_USER || "";
         this.port = Number(process.env.PORT);
         this.smtp_host = process.env.SMTP_HOST || "";
-        this.email_password = process.env.GMAIL_PASSWORD || "";
-        this.email_username = process.env.GMAIL_USERNAME || "";
+        this.email_password = process.env.EMAIL_PASSWORD || "";
+        this.email_username = process.env.EMAIL_USERNAME || "";
         this.sender_email = process.env.SENDER_EMAIL || "";
         switch (this.current_dev) {
             case "matt":
