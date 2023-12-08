@@ -81,7 +81,6 @@ AuthRouter.post("/reset-password/:token", async (req, res) => {
 
 AuthRouter.post("/checkLogin", (req, res) => {
     const token = req.cookies.token;
-    console.log("URMOM");
 
     if (token) {
         jwt.verify(token, env.secret_key, (error: any, decoded: any) => {
@@ -132,7 +131,6 @@ AuthRouter.post("/login", async (req, res) => {
                             const expirationDate = new Date(
                                 Date.now() + expirationTime
                             );
-                            console.log(token);
                             res.cookie("token", token, {
                                 expires: expirationDate,
                             });
@@ -178,15 +176,7 @@ AuthRouter.post("/signup", async (req, res) => {
 
 AuthRouter.get("/logout", (req, res) => {
     try {
-        console.log("Logging out user...");
-
-        // Log the current cookie values for troubleshooting
-        console.log("Current cookies:", req.cookies);
-
         res.clearCookie("token");
-
-        console.log("Token cookie cleared successfully");
-
         res.status(200).json({ message: "logout successful" });
     } catch (error) {
         console.error("Error during logout:", error);
