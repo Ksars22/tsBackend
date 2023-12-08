@@ -19,6 +19,27 @@ const userSchema = new mongoose.Schema({
         required: true,
         type: String,
     },
+    height: {
+        required: false,
+        type: String,
+    },
+    weight: {
+        required: false,
+        type: String,
+    },
+    fitnessGoals: {
+        required: false,
+        type: String,
+    },
+    activityLevel: {
+        required: false,
+        type: String,
+    },
+    allergies: {
+        required: false,
+        type: String,
+    },
+
     resetToken: String,
     resetTokenExpiration: Date,
 });

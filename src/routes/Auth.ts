@@ -81,6 +81,7 @@ AuthRouter.post("/reset-password/:token", async (req, res) => {
 
 AuthRouter.post("/checkLogin", (req, res) => {
     const token = req.cookies.token;
+    console.log("URMOM");
 
     if (token) {
         jwt.verify(token, env.secret_key, (error: any, decoded: any) => {
@@ -90,6 +91,8 @@ AuthRouter.post("/checkLogin", (req, res) => {
                 res.status(200).json({ token: token });
             }
         });
+    } else {
+        res.status(403).json({ message: "Unauthorized" });
     }
 });
 
@@ -129,6 +132,7 @@ AuthRouter.post("/login", async (req, res) => {
                             const expirationDate = new Date(
                                 Date.now() + expirationTime
                             );
+                            console.log(token);
                             res.cookie("token", token, {
                                 httpOnly: true,
                                 expires: expirationDate,
