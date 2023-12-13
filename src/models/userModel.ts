@@ -43,15 +43,15 @@ const userSchema = new mongoose.Schema({
         required: false,
         type: String,
     },
+    allergies: {
+        required: false,
+        type: String,
+    },
     fitnessGoals: {
         required: false,
         type: String,
     },
     activityLevel: {
-        required: false,
-        type: String,
-    },
-    allergies: {
         required: false,
         type: String,
     },
