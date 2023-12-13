@@ -1,5 +1,5 @@
 import express from "express";
-import jwt from "jsonwebtoken";
+import jwt, { JwtPayload, VerifyErrors } from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
 import nodemailer from "nodemailer";
@@ -196,13 +196,51 @@ AuthRouter.post("/user-profile", async (req, res) => {
     const token = req.cookies.token;
 
     if (token) {
-        jwt.verify(token, env.secret_key, (error: any, decoded: any) => {
-            if (error) {
-                res.status(403).json({ message: "Unauthorized" });
-            } else {
-                res.status(200).json({ token: token });
+        jwt.verify(
+            token,
+            env.secret_key,
+            async (error: VerifyErrors | null, decoded: any) => {
+                if (error) {
+                    res.status(403).json({ message: "Unauthorized" });
+                } else {
+                    const userId = decoded.id;
+
+                    try {
+                        const updatedUser = await UserModel.findByIdAndUpdate(
+                            userId,
+                            {
+                                firstName: req.body.firstName,
+                                lastName: req.body.lastName,
+                                dateOfBirth: req.body.dateOfBirth,
+                                sex: req.body.sex,
+                                height: req.body.height,
+                                weight: req.body.weight,
+                            },
+                            { new: true }
+                        );
+
+                        if (!updatedUser) {
+                            return res
+                                .status(404)
+                                .json({ message: "User not found" });
+                        }
+
+                        res.status(200).json({
+                            message: "User profile updated",
+                            user: updatedUser,
+                        });
+                    } catch (updateError) {
+                        console.error(
+                            "Error updating user profile:",
+                            updateError
+                        );
+                        res.status(500).json({
+                            message: "Internal Server Error",
+                        });
+                    }
+                }
             }
-        });
+        );
     } else {
         res.status(403).json({ message: "Unauthorized" });
     }
