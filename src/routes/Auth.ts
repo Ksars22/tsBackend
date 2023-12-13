@@ -168,9 +168,43 @@ AuthRouter.post("/signup", async (req, res) => {
                     phone: req.body.phone,
                 });
                 data.save();
-                res.status(200).json({ message: "Signup Success" });
+
+                jwt.sign(
+                    { id: data._id },
+                    env.secret_key,
+                    (error: Error | null, token?: string) => {
+                        if (error) {
+                            res.status(500).send({ error: "JWT Error" });
+                        } else {
+                            const expirationTime = 60 * 60 * 1000; // Adjust as needed
+                            const expirationDate = new Date(
+                                Date.now() + expirationTime
+                            );
+                            res.cookie("token", token, {
+                                expires: expirationDate,
+                            });
+                            res.status(200).json({ login: "success" });
+                        }
+                    }
+                );
             }
         });
+    }
+});
+
+AuthRouter.post("/user-profile", async (req, res) => {
+    const token = req.cookies.token;
+
+    if (token) {
+        jwt.verify(token, env.secret_key, (error: any, decoded: any) => {
+            if (error) {
+                res.status(403).json({ message: "Unauthorized" });
+            } else {
+                res.status(200).json({ token: token });
+            }
+        });
+    } else {
+        res.status(403).json({ message: "Unauthorized" });
     }
 });
 
