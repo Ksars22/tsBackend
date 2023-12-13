@@ -192,7 +192,7 @@ AuthRouter.post("/signup", async (req, res) => {
     }
 });
 
-AuthRouter.post("/user-profile", async (req, res) => {
+AuthRouter.put("/user-profile", async (req, res) => {
     const token = req.cookies.token;
 
     if (token) {
@@ -215,6 +215,55 @@ AuthRouter.post("/user-profile", async (req, res) => {
                                 sex: req.body.sex,
                                 height: req.body.height,
                                 weight: req.body.weight,
+                            },
+                            { new: true }
+                        );
+
+                        if (!updatedUser) {
+                            return res
+                                .status(404)
+                                .json({ message: "User not found" });
+                        }
+
+                        res.status(200).json({
+                            message: "User profile updated",
+                            user: updatedUser,
+                        });
+                    } catch (updateError) {
+                        console.error(
+                            "Error updating user profile:",
+                            updateError
+                        );
+                        res.status(500).json({
+                            message: "Internal Server Error",
+                        });
+                    }
+                }
+            }
+        );
+    } else {
+        res.status(403).json({ message: "Unauthorized" });
+    }
+});
+
+AuthRouter.put("/fitness-goals-form", async (req, res) => {
+    const token = req.cookies.token;
+
+    if (token) {
+        jwt.verify(
+            token,
+            env.secret_key,
+            async (error: VerifyErrors | null, decoded: any) => {
+                if (error) {
+                    res.status(403).json({ message: "Unauthorized" });
+                } else {
+                    const userId = decoded.id;
+
+                    try {
+                        const updatedUser = await UserModel.findByIdAndUpdate(
+                            userId,
+                            {
+                                fitnessGoals: req.body.fitnessGoals,
                             },
                             { new: true }
                         );
