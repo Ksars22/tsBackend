@@ -6,6 +6,7 @@ import nodemailer from "nodemailer";
 
 import { UserModel } from "../models/userModel";
 import { env } from "../index";
+import { ErrorMessage } from "../errorMessages";
 
 const AuthRouter = express.Router();
 
@@ -79,19 +80,25 @@ AuthRouter.post("/reset-password/:token", async (req, res) => {
     }
 });
 
-AuthRouter.post("/checkLogin", (req, res) => {
+AuthRouter.post("/check-login", (req, res) => {
     const token = req.cookies.token;
 
     if (token) {
         jwt.verify(token, env.secret_key, (error: any, decoded: any) => {
             if (error) {
                 res.status(403).json({ message: "Unauthorized" });
+                console.error(error);
             } else {
                 res.status(200).json({ token: token });
+                //content
             }
         });
+    } else if (token === undefined) {
+        res.status(403).json({ message: "Unauthorized" });
+        console.error(ErrorMessage.UNDEFINED_TOKEN);
     } else {
         res.status(403).json({ message: "Unauthorized" });
+        console.error(ErrorMessage.INVALID_TOKEN);
     }
 });
 
@@ -105,15 +112,16 @@ AuthRouter.post("/login", async (req, res) => {
 
         if (!user) {
             res.status(403).send({
-                message: "Error Username or Password is Incorrect",
+                message: "User or password is incorrect",
             });
+            console.error(ErrorMessage.USER_DOES_NOT_EXIST);
             return;
         }
 
         bcrypt.compare(password, user.password, (error, result) => {
             if (error) {
                 res.status(403).send({ message: "Login Error" });
-                console.error("Error comparing passwords", error);
+                console.error(error);
             } else if (result) {
                 jwt.sign(
                     { id: user._id },
@@ -121,6 +129,7 @@ AuthRouter.post("/login", async (req, res) => {
                     (error: any, token: any) => {
                         if (error) {
                             res.status(500).send({ error: "JWT Error" });
+                            console.error(error);
                         } else {
                             let expirationTime;
                             if (rememberMe) {
@@ -140,12 +149,14 @@ AuthRouter.post("/login", async (req, res) => {
                 );
             } else {
                 res.status(403).send({
-                    message: "Error Username or Password is Incorrect",
+                    message: "User or password is incorrect",
                 });
+                console.error(ErrorMessage.INCORRECT_CREDENTIALS);
             }
         });
-    } catch (err) {
+    } catch (error) {
         res.status(500).send({ error: "Internal Server Error" });
+        console.error(error);
     }
 });
 
@@ -153,13 +164,15 @@ AuthRouter.post("/signup", async (req, res) => {
     const user = await UserModel.findOne({ username: req.body.username });
     if (user != null) {
         res.status(403).json({ message: "Error username already exists" });
+        console.error(ErrorMessage.USER_ALREADY_EXISTS);
     } else {
         const saltrounds = 10;
 
         var password = req.body.password;
         bcrypt.hash(password, saltrounds, (error, hash) => {
             if (error) {
-                console.error("Error hashing password:", error);
+                res.status(500).send({ message: "Signup Error" });
+                console.error(error);
             } else {
                 const data = new UserModel({
                     username: req.body.username,
@@ -175,6 +188,7 @@ AuthRouter.post("/signup", async (req, res) => {
                     (error: Error | null, token?: string) => {
                         if (error) {
                             res.status(500).send({ error: "JWT Error" });
+                            console.error(error);
                         } else {
                             const expirationTime = 60 * 60 * 1000; // Adjust as needed
                             const expirationDate = new Date(
@@ -202,6 +216,7 @@ AuthRouter.put("/user-profile", async (req, res) => {
             async (error: VerifyErrors | null, decoded: any) => {
                 if (error) {
                     res.status(403).json({ message: "Unauthorized" });
+                    console.error(error);
                 } else {
                     const userId = decoded.id;
 
@@ -218,31 +233,30 @@ AuthRouter.put("/user-profile", async (req, res) => {
                             },
                             { new: true }
                         );
-
                         if (!updatedUser) {
                             return res
                                 .status(404)
                                 .json({ message: "User not found" });
                         }
-
                         res.status(200).json({
                             message: "User profile updated",
                             user: updatedUser,
                         });
-                    } catch (updateError) {
-                        console.error(
-                            "Error updating user profile:",
-                            updateError
-                        );
+                    } catch (error) {
                         res.status(500).json({
                             message: "Internal Server Error",
                         });
+                        console.error(error);
                     }
                 }
             }
         );
+    } else if (token === undefined) {
+        res.status(403).json({ message: "Unauthorized" });
+        console.error(ErrorMessage.UNDEFINED_TOKEN);
     } else {
         res.status(403).json({ message: "Unauthorized" });
+        console.error(ErrorMessage.INVALID_TOKEN);
     }
 });
 
@@ -256,6 +270,7 @@ AuthRouter.put("/fitness-goals-form", async (req, res) => {
             async (error: VerifyErrors | null, decoded: any) => {
                 if (error) {
                     res.status(403).json({ message: "Unauthorized" });
+                    console.error(error);
                 } else {
                     const userId = decoded.id;
 
@@ -290,8 +305,12 @@ AuthRouter.put("/fitness-goals-form", async (req, res) => {
                 }
             }
         );
+    } else if (token === undefined) {
+        res.status(403).json({ message: "Unauthorized" });
+        console.error(ErrorMessage.UNDEFINED_TOKEN);
     } else {
         res.status(403).json({ message: "Unauthorized" });
+        console.error(ErrorMessage.INVALID_TOKEN);
     }
 });
 
@@ -339,8 +358,12 @@ AuthRouter.put("/activity-level-form", async (req, res) => {
                 }
             }
         );
+    } else if (token === undefined) {
+        res.status(403).json({ message: "Unauthorized" });
+        console.error(ErrorMessage.UNDEFINED_TOKEN);
     } else {
         res.status(403).json({ message: "Unauthorized" });
+        console.error(ErrorMessage.INVALID_TOKEN);
     }
 });
 
@@ -349,8 +372,8 @@ AuthRouter.get("/logout", (req, res) => {
         res.clearCookie("token");
         res.status(200).json({ message: "logout successful" });
     } catch (error) {
-        console.error("Error during logout:", error);
         res.status(500).json({ message: "Internal Server Error" });
+        console.error(error);
     }
 });
 
