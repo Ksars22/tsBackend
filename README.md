@@ -1,12 +1,6 @@
 # MacroSolver Backend REST API
 
-<style>
-    p {
-        text-align: center;
-    }
-</style>
-
-<p>
+<p align="center">
     <img src="https://img.shields.io/badge/language-typescript-%23f34b7d.svg?style=for-the-badge&logo=appveyor" alt="TypeScript">
     <img src="https://img.shields.io/badge/runtime-NodeJs-0078d7.svg?style=for-the-badge&logo=appveyor" alt="Nodejs">
     <img src="https://img.shields.io/badge/framework-express.js-green.svg?style=for-the-badge&logo=appveyor" alt="x86">
