@@ -99,7 +99,7 @@ Before you begin, make sure you have the following installed:
 
 ##### 3. POST /checkLogin
 
-    *No body needed*
+    * No body needed *
 
     Desired response:
 
