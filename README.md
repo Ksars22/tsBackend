@@ -1,5 +1,11 @@
 # MacroSolver Backend REST API
 
+<p>
+    <img src="https://img.shields.io/badge/language-typescript-%23f34b7d.svg?style=for-the-badge&logo=appveyor" alt="TypeScript">
+    <img src="https://img.shields.io/badge/runtime-NodeJs-0078d7.svg?style=for-the-badge&logo=appveyor" alt="Nodejs">
+    <img src="https://img.shields.io/badge/framework-express.js-green.svg?style=for-the-badge&logo=appveyor" alt="x86">
+</p>
+
 Welcome this is the backend for https://bitbucket.org/macroappdev/macroapprepo/src/master/
 
 ## Table of Contents
@@ -52,7 +58,7 @@ Before you begin, make sure you have the following installed:
 
     **currently using the testing enviroment but will chang when switched to production**
 
-6. Assign a Dev User.
+5. Assign a Dev User.
 
     **Depending on the configuration this will choose which database to connect to based on the dev user**
 
@@ -75,7 +81,7 @@ Before you begin, make sure you have the following installed:
     Desired response:
 
     *200* { "login": "success" }
-    
+
 ##### 2. POST /signup
 
     Content-Type: application/json
