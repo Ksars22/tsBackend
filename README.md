@@ -1,5 +1,11 @@
 # MacroSolver Backend REST API
 
+<p align="center">
+    <img src="https://img.shields.io/badge/language-typescript-%23f34b7d.svg?style=for-the-badge&logo=appveyor" alt="TypeScript">
+    <img src="https://img.shields.io/badge/runtime-NodeJs-0078d7.svg?style=for-the-badge&logo=appveyor" alt="Nodejs">
+    <img src="https://img.shields.io/badge/framework-express.js-green.svg?style=for-the-badge&logo=appveyor" alt="x86">
+</p>
+
 Welcome this is the backend for https://bitbucket.org/macroappdev/macroapprepo/src/master/
 
 ## Table of Contents
@@ -9,7 +15,6 @@ Welcome this is the backend for https://bitbucket.org/macroappdev/macroapprepo/s
     -   [Installation](#installation)
     -   [Configuration](#configuration)
 -   [Usage](#usage)
-    -   [Authentication](#authentication)
     -   [Endpoints](#endpoints)
 -   [License](#license)
 
@@ -49,7 +54,11 @@ Before you begin, make sure you have the following installed:
 
 3. Connect MongoDB URI.
 
-4. Assign a Dev User.
+4. Setup SMTP with https://mailtrap.io/ or the vendor of you choosing.
+
+    **currently using the testing enviroment but will chang when switched to production**
+
+5. Assign a Dev User.
 
     **Depending on the configuration this will choose which database to connect to based on the dev user**
 
@@ -69,6 +78,10 @@ Before you begin, make sure you have the following installed:
         "rememerMe": true/false
     }
 
+    Desired response:
+
+    *200* { "login": "success" }
+
 ##### 2. POST /signup
 
     Content-Type: application/json
@@ -80,9 +93,40 @@ Before you begin, make sure you have the following installed:
         "phone": "..."
     }
 
-##### 3. GET /checkLogin
+    Desired response:
+
+    *200* { "message": "Signup Success" }
+
+##### 3. POST /checkLogin
+
+    *No body needed*
+
+    Desired response:
+
+    *200* { "token": token } *this code needs changed* should return something like { "message": "user is already logged in" }*
+
+##### 4. POST /forgot-password
 
     Content-Type: application/json
-    Cookie: token=...
+
+    {
+        "email": "..."
+    }
+
+    Desired response:
+
+    *200* { "message": "Password reset email sent" }
+
+##### 5. POST /reset-password/:token
+
+    Content-Type: application/json
+
+    {
+        "password": "..."
+    }
+
+    Desired response:
+
+    *200* { "message": "Password reset successfully" }
 
 ### License
