@@ -129,4 +129,4 @@ Before you begin, make sure you have the following installed:
 
     *200* { "message": "Password reset successfully" }
 
-### License
+### Licenses
