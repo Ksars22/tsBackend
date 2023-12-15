@@ -3,10 +3,11 @@ import jwt, { JwtPayload, VerifyErrors } from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
 import nodemailer from "nodemailer";
-
-import { UserModel } from "../models/userModel";
 import { env } from "../index";
 import { ErrorMessage } from "../errorMessages";
+
+import { UserModel } from "../models/userModel";
+import { MealPlanModel } from "../models/mealModel";
 
 const AuthRouter = express.Router();
 
@@ -374,6 +375,64 @@ AuthRouter.get("/logout", (req, res) => {
     } catch (error) {
         res.status(500).json({ message: "Internal Server Error" });
         console.error(error);
+    }
+});
+
+AuthRouter.post("/create-meal-plan", async (req, res) => {
+    const token = req.cookies.token;
+
+    if (token) {
+        jwt.verify(token, env.secret_key, async (error: any, decoded: any) => {
+            if (error) {
+                res.status(403).json({ message: "Unauthorized" });
+            } else {
+                const userId = decoded.id;
+
+                try {
+                    const mealPlanData = {
+                        user: userId,
+                        name: req.body.name,
+                        description: req.body.description,
+                        meals: req.body.meals,
+                    };
+
+                    const mealPlan = new MealPlanModel(mealPlanData);
+                    const savedMealPlan = await mealPlan.save();
+
+                    // Update the user's activity level if needed
+                    const updatedUser = await UserModel.findByIdAndUpdate(
+                        userId,
+                        {
+                            activityLevel: req.body.activityLevel,
+                        },
+                        { new: true }
+                    );
+
+                    if (!updatedUser) {
+                        return res
+                            .status(404)
+                            .json({ message: "User not found" });
+                    }
+
+                    res.status(200).json({
+                        message: "Meal plan created and user profile updated",
+                        user: updatedUser,
+                        mealPlan: savedMealPlan,
+                    });
+                } catch (error) {
+                    console.error("Error creating meal plan:", error);
+                    res.status(500).json({
+                        message: "Internal Server Error",
+                    });
+                }
+            }
+        });
+    } else if (token === undefined) {
+        res.status(403).json({ message: "Unauthorized" });
+        console.error("Undefined Token");
+    } else {
+        res.status(403).json({ message: "Unauthorized" });
+        console.error("Invalid Token");
     }
 });
 
