@@ -399,24 +399,8 @@ AuthRouter.post("/create-meal-plan", async (req, res) => {
                     const mealPlan = new MealPlanModel(mealPlanData);
                     const savedMealPlan = await mealPlan.save();
 
-                    // Update the user's activity level if needed
-                    const updatedUser = await UserModel.findByIdAndUpdate(
-                        userId,
-                        {
-                            activityLevel: req.body.activityLevel,
-                        },
-                        { new: true }
-                    );
-
-                    if (!updatedUser) {
-                        return res
-                            .status(404)
-                            .json({ message: "User not found" });
-                    }
-
                     res.status(200).json({
                         message: "Meal plan created and user profile updated",
-                        user: updatedUser,
                         mealPlan: savedMealPlan,
                     });
                 } catch (error) {

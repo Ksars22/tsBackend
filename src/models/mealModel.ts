@@ -69,4 +69,4 @@ const mealSchema = new mongoose.Schema({
     },
 });
 
-export const MealPlan = mongoose.model("MealPlanModel", mealSchema);
+export const MealPlanModel = mongoose.model("MealPlanModel", mealSchema);
