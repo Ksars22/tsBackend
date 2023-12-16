@@ -381,9 +381,11 @@ AuthRouter.get("/logout", (req, res) => {
 
 AuthRouter.post("/create-meal-plan", async (req, res) => {
     const token = req.cookies.token;
-    console.log(req.body.mealPlanForm);
-    const mealPlanForm = req.body.mealPlanForm;
-    generateMealPlan(req.body.mealPlanForm);
+
+    const mealPlan = await generateMealPlan(req.body.mealPlanForm);
+    console.log(
+        "Generated Plan (logged from auth.ts): " + JSON.stringify(mealPlan)
+    );
 
     // if (token) {
     //     jwt.verify(token, env.secret_key, async (error: any, decoded: any) => {

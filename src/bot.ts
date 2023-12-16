@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 
 interface MealPlanForm {
     targetCost: string;
@@ -9,56 +9,110 @@ interface MealPlanForm {
 }
 
 interface GeneratedMealPlan {
-    // Define the structure of the generated meal plan JSON
-    // Update these types based on the actual structure from the OpenAI API
-    // For simplicity, I'm using any here, but you should specify the types properly
     [key: string]: any;
 }
 
 const generateMealPlan = async (
     mealPlanForm: MealPlanForm
 ): Promise<GeneratedMealPlan | null> => {
-    try {
-        const headers = {
-            "Content-Type": "application/json",
-            Authorization:
-                "Bearer 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",
-        };
+    const maxRetries = 3;
+    let retries = 0;
 
-        const data = {
-            messages: [
-                { role: "system", content: "You are" },
-                {
-                    role: "user",
-                    content: `Generate a meal plan with the following information: ${JSON.stringify(
-                        mealPlanForm
-                    )}`,
-                },
-            ],
-            model: "gpt-3.5-turbo",
-        };
+    while (retries < maxRetries) {
+        try {
+            const headers = {
+                "Content-Type": "application/json",
+                Authorization: "Bearer PLACE_KEY_HERE",
+            };
 
-        const response = await axios.post(
-            "https://api.openai.com/v1/chat/completions",
-            JSON.stringify(data),
-            { headers }
-        );
+            const data = {
+                messages: [
+                    { role: "system", content: "You are" },
+                    {
+                        role: "user",
+                        content: `Generate a meal plan with the following information: ${JSON.stringify(
+                            mealPlanForm
+                        )}, then, structure it using this schema:
+            
+            \`\`\`
+            {
+                user: ObjectId,
+                name: String,
+                description: String,
+                meals: [
+                    {
+                        name: String,
+                        calorieTotal: Number,
+                        carbs: Number,
+                        fat: Number,
+                        protein: Number,
+                        instructions: String,
+                        ingredients: [
+                            {
+                                name: String,
+                                quantity: String,
+                            },
+                        ],
+                    },
+                ],
+                createdAt: Date,
+                updatedAt: Date
+            }
+            \`\`\`
+            Provide the meal plan as a JSON object with the specified structure. Do not include additional text or explanations in the output, only the JSON representation of the meal plan. Must be ready to parse json
+            `,
+                    },
+                ],
+                model: "gpt-3.5-turbo",
+            };
 
-        // Extract the generated meal plan from the response
-        const generatedPlan = response.data.choices[0]?.text;
+            const response = await axios.post(
+                "https://api.openai.com/v1/chat/completions",
+                JSON.stringify(data),
+                { headers }
+            );
 
-        // Parse the generated text as JSON
-        const mealPlanJSON: GeneratedMealPlan = JSON.parse(generatedPlan);
+            const generatedPlan = response.data.choices[0].message.content;
+            const mealPlanString = JSON.stringify(generatedPlan);
 
-        // Output the generated meal plan
-        console.log(mealPlanJSON);
+            const userId = 24;
 
-        return mealPlanJSON;
-    } catch (error) {
-        // Handle errors appropriately (e.g., log to monitoring service, show user-friendly message)
-        console.error("Error generating meal plan:", error);
-        return null;
+            const updatedMealPlanString = mealPlanString.replace(
+                /"user": "ObjectId"/,
+                `"user": "${userId}"`
+            );
+
+            console.log(
+                "Generated Plan (logged from bot.ts): " +
+                    JSON.stringify(updatedMealPlanString)
+            );
+
+            if (!generatedPlan) {
+                console.error("Error: No meal plan generated");
+                return null;
+            }
+
+            const mealPlanJSON: GeneratedMealPlan = JSON.parse(generatedPlan);
+            return mealPlanJSON;
+        } catch (error: any) {
+            if (axios.isAxiosError(error) && error.response?.status === 429) {
+                // If rate limited, wait and retry
+                retries++;
+                console.warn(`Rate limited. Retrying attempt ${retries}...`);
+                await new Promise((resolve) =>
+                    setTimeout(resolve, 1000 * retries)
+                ); // Wait for an increasing amount of time
+            } else {
+                console.error("Error generating meal plan:", error.message);
+                return null;
+            }
+        }
     }
+
+    console.error(
+        `Max retries (${maxRetries}) reached. Unable to generate meal plan.`
+    );
+    return null;
 };
 
 export default generateMealPlan;
