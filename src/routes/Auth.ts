@@ -8,6 +8,7 @@ import { ErrorMessage } from "../errorMessages";
 
 import { UserModel } from "../models/userModel";
 import { MealPlanModel } from "../models/mealModel";
+import generateMealPlan from "../bot";
 
 const AuthRouter = express.Router();
 
@@ -380,44 +381,47 @@ AuthRouter.get("/logout", (req, res) => {
 
 AuthRouter.post("/create-meal-plan", async (req, res) => {
     const token = req.cookies.token;
+    console.log(req.body.mealPlanForm);
+    const mealPlanForm = req.body.mealPlanForm;
+    generateMealPlan(req.body.mealPlanForm);
 
-    if (token) {
-        jwt.verify(token, env.secret_key, async (error: any, decoded: any) => {
-            if (error) {
-                res.status(403).json({ message: "Unauthorized" });
-            } else {
-                const userId = decoded.id;
+    // if (token) {
+    //     jwt.verify(token, env.secret_key, async (error: any, decoded: any) => {
+    //         if (error) {
+    //             res.status(403).json({ message: "Unauthorized" });
+    //         } else {
+    //             const userId = decoded.id;
 
-                try {
-                    const mealPlanData = {
-                        user: userId,
-                        name: req.body.name,
-                        description: req.body.description,
-                        meals: req.body.meals,
-                    };
+    //             try {
+    //                 const mealPlanData = {
+    //                     user: userId,
+    //                     name: req.body.name,
+    //                     description: req.body.description,
+    //                     meals: req.body.meals,
+    //                 };
 
-                    const mealPlan = new MealPlanModel(mealPlanData);
-                    const savedMealPlan = await mealPlan.save();
+    //                 const mealPlan = new MealPlanModel(mealPlanData);
+    //                 const savedMealPlan = await mealPlan.save();
 
-                    res.status(200).json({
-                        message: "Meal plan created and user profile updated",
-                        mealPlan: savedMealPlan,
-                    });
-                } catch (error) {
-                    console.error("Error creating meal plan:", error);
-                    res.status(500).json({
-                        message: "Internal Server Error",
-                    });
-                }
-            }
-        });
-    } else if (token === undefined) {
-        res.status(403).json({ message: "Unauthorized" });
-        console.error("Undefined Token");
-    } else {
-        res.status(403).json({ message: "Unauthorized" });
-        console.error("Invalid Token");
-    }
+    //                 res.status(200).json({
+    //                     message: "Meal plan created and user profile updated",
+    //                     mealPlan: savedMealPlan,
+    //                 });
+    //             } catch (error) {
+    //                 console.error("Error creating meal plan:", error);
+    //                 res.status(500).json({
+    //                     message: "Internal Server Error",
+    //                 });
+    //             }
+    //         }
+    //     });
+    // } else if (token === undefined) {
+    //     res.status(403).json({ message: "Unauthorized" });
+    //     console.error("Undefined Token");
+    // } else {
+    //     res.status(403).json({ message: "Unauthorized" });
+    //     console.error("Invalid Token");
+    // }
 });
 
 export default AuthRouter;
