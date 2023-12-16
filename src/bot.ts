@@ -22,7 +22,8 @@ const generateMealPlan = async (
         try {
             const headers = {
                 "Content-Type": "application/json",
-                Authorization: "Bearer PLACE_KEY_HERE",
+                Authorization:
+                    "Bearer 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",
             };
 
             const data = {
@@ -59,7 +60,7 @@ const generateMealPlan = async (
                 updatedAt: Date
             }
             \`\`\`
-            Provide the meal plan as a JSON object with the specified structure. Do not include additional text or explanations in the output, only the JSON representation of the meal plan. Must be ready to parse json
+            Provide the meal plan as a JSON object with the specified structure. Do not include additional text or explanations in the output, only the JSON representation of the meal plan. Must be ready to parse json. Make the user equal to test. all fields must be filled.
             `,
                     },
                 ],
