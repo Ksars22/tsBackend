@@ -23,7 +23,7 @@ const generateMealPlan = async (
             const headers = {
                 "Content-Type": "application/json",
                 Authorization:
-                    "Bearer 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",
+                    "Bearer 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",
             };
 
             const data = {
@@ -43,6 +43,7 @@ const generateMealPlan = async (
                 meals: [
                     {
                         name: String,
+                        descriptiveName: String,
                         calorieTotal: Number,
                         carbs: Number,
                         fat: Number,

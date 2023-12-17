@@ -22,6 +22,10 @@ const mealSchema = new mongoose.Schema({
                 required: true,
                 trim: true,
             },
+            descriptiveName: {
+                type: String,
+                required: true,
+            },
             calorieTotal: {
                 type: Number,
                 required: true,

@@ -12,6 +12,7 @@ import generateMealPlan from "../bot";
 
 interface Meal {
     name: string;
+    descriptiveName: string;
     calorieTotal: number;
     carbs: number;
     fat: number;
@@ -435,6 +436,7 @@ AuthRouter.post("/create-meal-plan", async (req, res) => {
                             mealPlan.meals.forEach((meal: any) => {
                                 const newMeal = {
                                     name: meal.name,
+                                    descriptiveName: meal.descriptiveName || "",
                                     calorieTotal: meal.calorieTotal || 0,
                                     carbs: meal.carbs || 0,
                                     fat: meal.fat || 0,
@@ -471,6 +473,10 @@ AuthRouter.post("/create-meal-plan", async (req, res) => {
                                 "\n\n\n\nAfter all manipulation, ready to store: " +
                                     JSON.stringify(mealPlanData)
                             );
+
+                            res.status(200).json({
+                                message: "meal plan created",
+                            });
                         }
                     } catch (updateError) {
                         console.error(
