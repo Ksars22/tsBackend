@@ -3,10 +3,31 @@ import jwt, { JwtPayload, VerifyErrors } from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
 import nodemailer from "nodemailer";
-
-import { UserModel } from "../models/userModel";
 import { env } from "../index";
 import { ErrorMessage } from "../errorMessages";
+
+import { UserModel } from "../models/userModel";
+import { MealPlanModel } from "../models/mealModel";
+import generateMealPlan from "../bot";
+
+interface Meal {
+    name: string;
+    calorieTotal: number;
+    carbs: number;
+    fat: number;
+    protein: number;
+    instructions: string;
+    ingredients: { name: string; quantity: string }[];
+}
+
+interface MealPlanData {
+    user: string; // Change this to the actual type of user
+    name: string;
+    description: string;
+    meals: Meal[];
+    createdAt: Date;
+    updatedAt: Date;
+}
 
 const AuthRouter = express.Router();
 
@@ -375,6 +396,139 @@ AuthRouter.get("/logout", (req, res) => {
         res.status(500).json({ message: "Internal Server Error" });
         console.error(error);
     }
+});
+
+AuthRouter.post("/create-meal-plan", async (req, res) => {
+    const token = req.cookies.token;
+
+    if (token) {
+        jwt.verify(
+            token,
+            env.secret_key,
+            async (error: VerifyErrors | null, decoded: any) => {
+                if (error) {
+                    res.status(403).json({ message: "Unauthorized" });
+                } else {
+                    const userId = decoded.id;
+
+                    try {
+                        const mealPlan = await generateMealPlan(
+                            req.body.mealPlanForm
+                        );
+                        console.log(
+                            "\n\n\n\nGenerated Plan (logged from auth.ts): " +
+                                JSON.stringify(mealPlan)
+                        );
+
+                        // get ID
+
+                        if (mealPlan) {
+                            const mealPlanData = new MealPlanModel({
+                                user: userId || "",
+                                name: mealPlan.name || "",
+                                description: mealPlan.description || "",
+                                meals: [],
+                                createdAt: new Date(),
+                                updatedAt: new Date(),
+                            });
+
+                            mealPlan.meals.forEach((meal: any) => {
+                                const newMeal = {
+                                    name: meal.name,
+                                    calorieTotal: meal.calorieTotal || 0,
+                                    carbs: meal.carbs || 0,
+                                    fat: meal.fat || 0,
+                                    protein: meal.protein || 0,
+                                    instructions: meal.instructions || "",
+                                    ingredients: meal.ingredients.map(
+                                        (ingredient: any) => ({
+                                            name: ingredient.name || "",
+                                            quantity: ingredient.quantity || "",
+                                        })
+                                    ),
+                                };
+
+                                // Add the newMeal to the meals array in mealPlanData
+                                mealPlanData.meals.push(newMeal);
+                            });
+
+                            // Save the meal plan to the database
+                            mealPlanData
+                                .save()
+                                .then(() => {
+                                    console.log(
+                                        "Meal plan saved successfully!"
+                                    );
+                                })
+                                .catch((error: any) => {
+                                    console.error(
+                                        "Error saving meal plan:",
+                                        error.message
+                                    );
+                                });
+
+                            console.log(
+                                "\n\n\n\nAfter all manipulation, ready to store: " +
+                                    JSON.stringify(mealPlanData)
+                            );
+                        }
+                    } catch (updateError) {
+                        console.error(
+                            "Error updating user profile:",
+                            updateError
+                        );
+                        res.status(500).json({
+                            message: "Internal Server Error",
+                        });
+                    }
+                }
+            }
+        );
+    } else if (token === undefined) {
+        res.status(403).json({ message: "Unauthorized" });
+        console.error(ErrorMessage.UNDEFINED_TOKEN);
+    } else {
+        res.status(403).json({ message: "Unauthorized" });
+        console.error(ErrorMessage.INVALID_TOKEN);
+    }
+
+    // if (token) {
+    //     jwt.verify(token, env.secret_key, async (error: any, decoded: any) => {
+    //         if (error) {
+    //             res.status(403).json({ message: "Unauthorized" });
+    //         } else {
+    //             const userId = decoded.id;
+
+    //             try {
+    //                 const mealPlanData = {
+    //                     user: userId,
+    //                     name: req.body.name,
+    //                     description: req.body.description,
+    //                     meals: req.body.meals,
+    //                 };
+
+    //                 const mealPlan = new MealPlanModel(mealPlanData);
+    //                 const savedMealPlan = await mealPlan.save();
+
+    //                 res.status(200).json({
+    //                     message: "Meal plan created and user profile updated",
+    //                     mealPlan: savedMealPlan,
+    //                 });
+    //             } catch (error) {
+    //                 console.error("Error creating meal plan:", error);
+    //                 res.status(500).json({
+    //                     message: "Internal Server Error",
+    //                 });
+    //             }
+    //         }
+    //     });
+    // } else if (token === undefined) {
+    //     res.status(403).json({ message: "Unauthorized" });
+    //     console.error("Undefined Token");
+    // } else {
+    //     res.status(403).json({ message: "Unauthorized" });
+    //     console.error("Invalid Token");
+    // }
 });
 
 export default AuthRouter;
