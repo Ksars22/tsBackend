@@ -23,7 +23,7 @@ const generateMealPlan = async (
             const headers = {
                 "Content-Type": "application/json",
                 Authorization:
-                    "Bearer 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",
+                    "Bearer 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",
             };
 
             const data = {

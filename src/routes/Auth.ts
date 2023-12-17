@@ -401,55 +401,95 @@ AuthRouter.get("/logout", (req, res) => {
 AuthRouter.post("/create-meal-plan", async (req, res) => {
     const token = req.cookies.token;
 
-    const mealPlan = await generateMealPlan(req.body.mealPlanForm);
-    console.log(
-        "\n\n\n\nGenerated Plan (logged from auth.ts): " +
-            JSON.stringify(mealPlan)
-    );
+    if (token) {
+        jwt.verify(
+            token,
+            env.secret_key,
+            async (error: VerifyErrors | null, decoded: any) => {
+                if (error) {
+                    res.status(403).json({ message: "Unauthorized" });
+                } else {
+                    const userId = decoded.id;
 
-    if (mealPlan) {
-        // Assuming 'mealModel' is your Mongoose model
-        const mealPlanData = new MealPlanModel({
-            user: mealPlan.user || "",
-            name: mealPlan.name || "",
-            description: mealPlan.description || "",
-            meals: [],
-            createdAt: new Date(),
-            updatedAt: new Date(),
-        });
+                    try {
+                        const mealPlan = await generateMealPlan(
+                            req.body.mealPlanForm
+                        );
+                        console.log(
+                            "\n\n\n\nGenerated Plan (logged from auth.ts): " +
+                                JSON.stringify(mealPlan)
+                        );
 
-        mealPlan.meals.forEach((meal: any) => {
-            const newMeal = {
-                name: meal.name,
-                calorieTotal: meal.calorieTotal || 0,
-                carbs: meal.carbs || 0,
-                fat: meal.fat || 0,
-                protein: meal.protein || 0,
-                instructions: meal.instructions || "",
-                ingredients: meal.ingredients.map((ingredient: any) => ({
-                    name: ingredient.name || "",
-                    quantity: ingredient.quantity || "",
-                })),
-            };
+                        // get ID
 
-            // Add the newMeal to the meals array in mealPlanData
-            mealPlanData.meals.push(newMeal);
-        });
+                        if (mealPlan) {
+                            const mealPlanData = new MealPlanModel({
+                                user: userId || "",
+                                name: mealPlan.name || "",
+                                description: mealPlan.description || "",
+                                meals: [],
+                                createdAt: new Date(),
+                                updatedAt: new Date(),
+                            });
 
-        // Save the meal plan to the database
-        mealPlanData
-            .save()
-            .then(() => {
-                console.log("Meal plan saved successfully!");
-            })
-            .catch((error: any) => {
-                console.error("Error saving meal plan:", error.message);
-            });
+                            mealPlan.meals.forEach((meal: any) => {
+                                const newMeal = {
+                                    name: meal.name,
+                                    calorieTotal: meal.calorieTotal || 0,
+                                    carbs: meal.carbs || 0,
+                                    fat: meal.fat || 0,
+                                    protein: meal.protein || 0,
+                                    instructions: meal.instructions || "",
+                                    ingredients: meal.ingredients.map(
+                                        (ingredient: any) => ({
+                                            name: ingredient.name || "",
+                                            quantity: ingredient.quantity || "",
+                                        })
+                                    ),
+                                };
 
-        console.log(
-            "\n\n\n\nAfter all manipulation, ready to store: " +
-                JSON.stringify(mealPlanData)
+                                // Add the newMeal to the meals array in mealPlanData
+                                mealPlanData.meals.push(newMeal);
+                            });
+
+                            // Save the meal plan to the database
+                            mealPlanData
+                                .save()
+                                .then(() => {
+                                    console.log(
+                                        "Meal plan saved successfully!"
+                                    );
+                                })
+                                .catch((error: any) => {
+                                    console.error(
+                                        "Error saving meal plan:",
+                                        error.message
+                                    );
+                                });
+
+                            console.log(
+                                "\n\n\n\nAfter all manipulation, ready to store: " +
+                                    JSON.stringify(mealPlanData)
+                            );
+                        }
+                    } catch (updateError) {
+                        console.error(
+                            "Error updating user profile:",
+                            updateError
+                        );
+                        res.status(500).json({
+                            message: "Internal Server Error",
+                        });
+                    }
+                }
+            }
         );
+    } else if (token === undefined) {
+        res.status(403).json({ message: "Unauthorized" });
+        console.error(ErrorMessage.UNDEFINED_TOKEN);
+    } else {
+        res.status(403).json({ message: "Unauthorized" });
+        console.error(ErrorMessage.INVALID_TOKEN);
     }
 
     // if (token) {
